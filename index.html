@@ -1,88 +1,63 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة ثانية ثانوي الرسمية</title>
-    
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "6c17afb8-033f-444e-9132-9ec51a66e542",
-        });
-      });
-    </script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { tajawal: ['Tajawal', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 800: '#1e40af', 900: '#1e3a8a' },
-                        gold: '#ca8a04'
-                    }
-                }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yalla Chemistry Live Contest</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js"
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { font-family: 'Tajawal', sans-serif; transition: background-color 0.4s ease, color 0.4s ease; }
-        .premium-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(148, 163, 184, 0.2); }
-        .glass-header { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background-color: rgba(255, 255, 255, 0.9); border-bottom: 1px solid #e2e8f0; }
-        .dark .glass-header { background-color: rgba(15, 23, 42, 0.85); border-bottom: 1px solid #334155; }
-    </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
-    <header class="fixed w-full top-0 z-50 glass-header">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-white rounded-xl p-1 shadow-sm border border-gray-200">
-                    <img src="https://i.ibb.co/dyLKg9t/file-0000000019687243878a13e9b38ee2f9.png" class="w-full h-full object-contain">
-                </div>
-                <h1 class="text-xl font-black text-brand-900 dark:text-white">منصة ثانية ثانوي</h1>
+<body>
+    <div id="app">
+        <!-- Brand -->
+        <div class="brand">
+            <img src="https://i.ibb.co/67wcPSGc/logo.png" alt="Yalla Chemistry" />
+            <h1>مسابقة يلا كيمياء المباشرة</h1>
+        </div>
+
+        <!-- Login -->
+        <div id="loginSection">
+            <input type="text" id="studentName" placeholder="اكتب اسمك الثنائي" />
+            <button id="joinBtn">دخول المسابقة</button>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="studentDashboard" class="hidden">
+            <div id="timerDisplay">⏳ 60</div>
+            <div id="questionBox">
+                <h2 id="qTitle">السؤال</h2>
+                <div id="optionsContainer"></div>
+                <button id="submitAnswerBtn">إرسال الإجابة</button>
+                <div id="feedbackMsg">في انتظار السؤال...</div>
             </div>
-            <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 bg-gray-100 dark:bg-slate-800 rounded-full">
-                <i data-lucide="moon" class="dark:hidden w-5 h-5"></i>
-                <i data-lucide="sun" class="hidden dark:block w-5 h-5 text-yellow-400"></i>
-            </button>
+            <div id="leaderboard">
+                <h3>🏆 الترتيب</h3>
+                <div id="lbList"></div>
+            </div>
         </div>
-    </header>
 
-    <main class="pt-32 px-4 max-w-7xl mx-auto text-center">
-        <h2 class="text-4xl sm:text-6xl font-black mb-6">جميع الكتب في مكان واحد..<br><span class="text-brand-600">سهلناها عليك!</span></h2>
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-            <button class="bg-brand-600 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-                <i data-lucide="library"></i> مكتبة الكتب PDF
-            </button>
-            <button id="installBtn" class="bg-white dark:bg-slate-900 border-2 border-brand-600 px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-                <i data-lucide="download" class="text-brand-600"></i> تثبيت المنصة كتطبيق
-            </button>
+        <!-- Winner Screen -->
+        <div id="winnerOverlay" class="hidden">
+            <div id="confettiContainer"></div>
+            <div class="winner-content">
+                <div class="trophy">🏆</div>
+                <div id="winnerName">الاسم</div>
+                <div id="winnerScore">نقاط: 0</div>
+                <div id="top10List"></div>
+                <button id="resetWinnerBtn">⟲ العودة</button>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <script>
-        lucide.createIcons();
-        // كود تثبيت التطبيق
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-        document.getElementById('installBtn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-            } else {
-                alert("التطبيق متاح للتثبيت من قائمة المتصفح");
-            }
-        });
-    </script>
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="student.js"></script>
 </body>
 </html>
