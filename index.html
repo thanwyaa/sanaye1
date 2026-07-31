@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Yalla Chemistry Live Contest</title>
+
+    <!-- ===== Firebase v12 Modules ===== -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js"
+            }
+        }
+    </script>
+
+    <style>
+        /* ============================================================
+           CSS RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0a0c14;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            margin: 0;
+            color: #f0f3ff;
+        }
+
+        /* ============================================================
+           GLASSMORPHISM CONTAINER
+           ============================================================ */
+        .glass {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            padding: 32px 24px;
+            max-width: 640px;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================================
+           BRAND & LOGO
+           ============================================================ */
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .brand-logo {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 8px 30px rgba(0, 180, 255, 0.25));
+            transition: transform 0.5s ease;
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.02);
+        }
+
+        .contest-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 24px 10px 20px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .contest-header img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .contest-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #7bb8ff 50%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(74, 158, 255, 0.15);
+            line-height: 1.3;
+        }
+
+        /* ============================================================
+           FORMS & INPUTS
+           ============================================================ */
+        .form-group {
+            margin-top: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #94a9d4;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 22px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            color: #f0f3ff;
+            transition: 0.25s ease;
+            outline: none;
+            backdrop-filter: blur(4px);
+            text-align: right;
+        }
+
+        .form-group input:focus {
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 4px rgba(74, 158, 255, 0.12);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: 300;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #4a9eff, #7c5cfc);
+            border: none;
+            border-radius: 40px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.25s ease;
+            box-shadow: 0 8px 28px rgba(74, 158, 255, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 12px 40px rgba(74, 158, 255, 0.35);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* ============================================================
+           STUDENT DASHBOARD
+           ============================================================ */
+        .timer-display {
+            font-size: 3.2rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 12px 0 8px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 3px;
+            color: #7bb8ff;
+            text-shadow: 0 0 40px rgba(74, 158, 255, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            margin-bottom: 16px;
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 32px;
+            padding: 24px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin: 12px 0 20px;
+        }
+
+        .question-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #e4edff;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        @media (max-width: 480px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            color: #d4e0ff;
+            cursor: pointer;
+            transition: 0.15s ease;
+            backdrop-filter: blur(4px);
+            font-weight: 500;
+            text-align: right;
+            width: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(74, 158, 255, 0.12);
+            border-color: #4a9eff;
+            transform: scale(1.02);
+        }
+
+        .option-btn.selected {
+            background: rgba(74, 158, 255, 0.2);
+            border-color: #4a9eff;
+            box-shadow: 0 0 24px rgba(74, 158, 255, 0.12);
+        }
+
+        .option-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .submit-answer-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00d4aa, #00b4d8);
+            border: none;
+            border-radius: 40px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #0a0c14;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 6px;
+        }
+
+        .submit-answer-btn:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .submit-answer-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+        }
+
+        .feedback-msg {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: rgba(0, 200, 150, 0.06);
+            border: 1px solid rgba(0, 200, 150, 0.1);
+            text-align: center;
+            font-weight: 500;
+            color: #7effd6;
+            font-size: 0.95rem;
+        }
+
+        .feedback-msg.closed {
+            background: rgba(255, 170, 0, 0.06);
+            border-color: rgba(255, 170, 0, 0.1);
+            color: #ffd966;
+        }
+
+        /* ============================================================
+           LEADERBOARD
+           ============================================================ */
+        .leaderboard-section {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .leaderboard-section h3 {
+            font-weight: 400;
+            color: #8aa4d8;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .lb-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .lb-item:last-child {
+            border-bottom: none;
+        }
+
+        .lb-rank {
+            color: #6c8bc0;
+            width: 36px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .lb-name {
+            flex: 1;
+            padding: 0 12px;
+            font-weight: 500;
+        }
+
+        .lb-score {
+            font-weight: 700;
+            color: #b8d0ff;
+            font-size: 1.05rem;
+        }
+
+        .lb-item.top1 .lb-rank {
+            color: #ffd700;
+        }
+        .lb-item.top2 .lb-rank {
+            color: #c0c0c0;
+        }
+        .lb-item.top3 .lb-rank {
+            color: #cd7f32;
+        }
+
+        /* ============================================================
+           ADMIN PANEL
+           ============================================================ */
+        .admin-panel {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-panel h2 {
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: #8aa4d8;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 12px 0 18px;
+        }
+
+        @media (max-width: 400px) {
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .stat-card .num {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #a5d8ff;
+        }
+
+        .stat-card .label {
+            font-size: 0.65rem;
+            color: #6c8bc0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .admin-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 16px;
+        }
+
+        .admin-actions button {
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #d0dfff;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex: 1 0 auto;
+            font-size: 0.9rem;
+            min-width: 70px;
+        }
+
+        .admin-actions button:hover {
+            background: rgba(74, 158, 255, 0.12);
+            border-color: #4a9eff;
+        }
+
+        .admin-actions .danger {
+            color: #ff7a7a;
+            border-color: rgba(255, 80, 80, 0.15);
+        }
+
+        .admin-actions .danger:hover {
+            background: rgba(255, 80, 80, 0.12);
+            border-color: #ff7a7a;
+        }
+
+        .admin-actions .success {
+            color: #7effd6;
+            border-color: rgba(0, 200, 150, 0.12);
+        }
+
+        .admin-actions .success:hover {
+            background: rgba(0, 200, 150, 0.08);
+            border-color: #7effd6;
+        }
+
+        .admin-actions .warning {
+            color: #ffd966;
+            border-color: rgba(255, 170, 0, 0.12);
+        }
+
+        .admin-actions .warning:hover {
+            background: rgba(255, 170, 0, 0.08);
+            border-color: #ffd966;
+        }
+
+        .admin-questions-list {
+            margin: 16px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .admin-questions-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .admin-questions-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .admin-questions-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .q-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.15s;
+            cursor: pointer;
+        }
+
+        .q-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .q-item.selected {
+            border-color: #4a9eff;
+            background: rgba(74, 158, 255, 0.08);
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.05);
+        }
+
+        .q-item .q-title {
+            font-weight: 500;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .q-item .q-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .q-item .q-actions button {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #b0c4de;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .q-item .q-actions button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .q-item .q-status {
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #6c8bc0;
+        }
+
+        .admin-leaderboard {
+            margin-top: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .admin-leaderboard .lb-item {
+            padding: 6px 4px;
+        }
+
+        /* ============================================================
+           WINNER SCREEN (Cinematic)
+           ============================================================ */
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0a0c14;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .winner-overlay .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .winner-content {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .winner-content .trophy {
+            font-size: 5rem;
+            margin-bottom: 8px;
+            animation: trophyPulse 1.8s ease-in-out infinite;
+            display: block;
+        }
+
+        @keyframes trophyPulse {
+            0%,
+            100% {
+                transform: scale(1) rotate(-3deg);
+            }
+            50% {
+                transform: scale(1.12) rotate(3deg);
+            }
+        }
+
+        .winner-content .winner-logo {
+            width: 180px;
+            height: auto;
+            margin: 10px auto 16px;
+            display: block;
+            filter: drop-shadow(0 8px 40px rgba(0, 180, 255, 0.4));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .winner-content .winner-name {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: goldShine 2s ease-in-out infinite;
+            line-height: 1.2;
+        }
+
+        @keyframes goldShine {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .winner-content .winner-score {
+            font-size: 1.3rem;
+            color: #b0c4de;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .winner-content .winner-subtitle {
+            color: #8aa4d8;
+            font-size: 0.9rem;
+            margin: 4px 0 16px;
+            letter-spacing: 2px;
+        }
+
+        .winner-content .top10-list {
+            margin-top: 16px;
+            width: 100%;
+            text-align: right;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .winner-content .top10-list .lb-item {
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .winner-content .top10-list .lb-item:last-child {
+            border-bottom: none;
+        }
+
+        .winner-content .btn-reset {
+            margin-top: 24px;
+            padding: 12px 40px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: #b0c4de;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .winner-content .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== Confetti Pieces ===== */
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -20px;
+            animation: confettiFall linear forwards;
+            opacity: 0.9;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* ===== Fireworks spark ===== */
+        .firework {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50%;
+            animation: fireworkBurst 0.8s ease-out forwards;
+        }
+
+        @keyframes fireworkBurst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 480px) {
+            .glass {
+                padding: 20px 14px;
+                border-radius: 32px;
+            }
+
+            .contest-header h1 {
+                font-size: 1.1rem;
+            }
+
+            .contest-header img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .timer-display {
+                font-size: 2.5rem;
+            }
+
+            .question-title {
+                font-size: 1.1rem;
+            }
+
+            .winner-content .winner-name {
+                font-size: 2rem;
+            }
+
+            .winner-content .winner-logo {
+                width: 140px;
+            }
+
+            .admin-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .admin-actions button {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    MAIN APP
+    ============================================================ -->
+    <div id="app" class="glass">
+
+        <!-- ===== BRAND ===== -->
+        <div class="brand">
+            <img class="brand-logo" src="https://i.ibb.co/67wcPSGc/logo.png" alt="Yalla Chemistry Logo" id="mainLogo" />
+            <div class="contest-header">
+                <img src="https://i.ibb.co/q328tph7/badge.png" alt="Contest Badge" />
+                <h1>مسابقة يلا كيمياء المباشرة</h1>
+            </div>
+        </div>
+
+        <!-- ===== LOGIN SECTION ===== -->
+        <div id="loginSection">
+            <div class="form-group">
+                <label for="studentName">👤 اكتب اسمك الثنائي</label>
+                <input type="text" id="studentName" placeholder="مثال: أحمد محمد" maxlength="30" autocomplete="off" />
+            </div>
+            <button class="btn-primary" id="joinBtn">🚀 دخول المسابقة</button>
+            <div style="margin-top:10px;font-size:0.75rem;color:#6c8bc0;text-align:center;">سيتم حفظ جلسة دخولك تلقائياً</div>
+        </div>
+
+        <!-- ===== STUDENT DASHBOARD ===== -->
+        <div id="studentDashboard" class="hidden">
+            <div class="timer-display" id="timerDisplay">⏳ 0</div>
+
+            <div class="question-box">
+                <div class="question-title" id="qTitle">⏳ في انتظار السؤال...</div>
+                <div class="options-grid" id="optionsContainer"></div>
+                <button class="submit-answer-btn" id="submitAnswerBtn">📤 إرسال الإجابة</button>
+                <div class="feedback-msg" id="feedbackMsg">⏳ في انتظار فتح السؤال...</div>
+            </div>
+
+            <div class="leaderboard-section">
+                <h3>🏆 الترتيب المباشر</h3>
+                <div id="lbList"></div>
+            </div>
+        </div>
+
+        <!-- ===== ADMIN PANEL ===== -->
+        <div id="adminPanel" class="admin-panel hidden">
+            <hr style="border-color:rgba(255,255,255,0.04);margin:0 0 16px;" />
+            <h2>⚙️ لوحة الأدمن</h2>
+
+            <div class="admin-stats" id="adminStats">
+                <div class="stat-card"><div class="num" id="statPlayers">0</div><div class="label">المشاركون</div></div>
+                <div class="stat-card"><div class="num" id="statAnswers">0</div><div class="label">المجيبون</div></div>
+                <div class="stat-card"><div class="num" id="statQuestions">0</div><div class="label">الأسئلة</div></div>
+            </div>
+
+            <div class="admin-actions">
+                <button class="success" id="adminAddQ">➕ إضافة</button>
+                <button id="adminOpenQ">🔓 فتح</button>
+                <button id="adminCloseQ">🔒 إغلاق</button>
+                <button id="adminNextQ">⏩ التالي</button>
+                <button class="danger" id="adminDeleteQ">🗑️ حذف</button>
+                <button class="warning" id="adminDeclareWinner">🏆 النتيجة</button>
+            </div>
+
+            <div style="font-size:0.8rem;color:#6c8bc0;margin:4px 0 8px;">⬅️ اختر سؤالاً من القائمة ثم اضغط فتح</div>
+
+            <div class="admin-questions-list" id="questionsList">
+                <div style="color:#6c8bc0;font-size:0.9rem;padding:12px;text-align:center;">لا توجد أسئلة</div>
+            </div>
+
+            <div class="admin-leaderboard">
+                <h3 style="color:#8aa4d8;font-weight:400;font-size:0.8rem;letter-spacing:1px;margin-bottom:8px;">🏅 ترتيب الطلاب</h3>
+                <div id="adminLbList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    WINNER OVERLAY (Cinematic)
+    ============================================================ -->
+    <div id="winnerOverlay" class="winner-overlay hidden">
+        <div class="confetti-container" id="confettiContainer"></div>
+        <div class="winner-content">
+            <div class="trophy">🏆</div>
+            <img class="winner-logo" src="https://i.ibb.co/67wcPSGc/logo.png" alt="Yalla Chemistry Logo" />
+            <div class="winner-name" id="winnerName">الاسم</div>
+            <div class="winner-score" id="winnerScore">⭐ نقاط: 0</div>
+            <div class="winner-subtitle">🥇 الفائز الأول</div>
+            <div class="top10-list" id="top10List"></div>
+            <button class="btn-reset" id="resetWinnerBtn">⟲ العودة</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MAIN JAVASCRIPT (ES6 Module)
+    ============================================================ -->
+    <script type="module">
+        // ============================================================
+        // IMPORTS
+        // ============================================================
+        import { initializeApp } from 'firebase/app';
+        import {
+            getAuth, signInAnonymously, onAuthStateChanged
+        } from 'firebase/auth';
+        import {
+            getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot,
+            collection, query, orderBy, limit, getDocs, where, runTransaction,
+            serverTimestamp, increment, arrayUnion, addDoc
+        } from 'firebase/firestore';
+
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBLaDBrsQ3qkXIG5BQtL-XQmalThFoUIpw",
+            authDomain: "yalla-chemistry-live.firebaseapp.com",
+            projectId: "yalla-chemistry-live",
+            storageBucket: "yalla-chemistry-live.firebasestorage.app",
+            messagingSenderId: "369672758368",
+            appId: "1:369672758368:web:2bc416a28fbe6448214f05",
+            measurementId: "G-V2PVXKGS31"
+        };
+
+        // ============================================================
+        // INIT FIREBASE
+        // ============================================================
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const $ = (id) => document.getElementById(id);
+        const loginSection = $('loginSection');
+        const studentDashboard = $('studentDashboard');
+        const adminPanel = $('adminPanel');
+        const joinBtn = $('joinBtn');
+        const studentNameInput = $('studentName');
+        const timerDisplay = $('timerDisplay');
+        const qTitle = $('qTitle');
+        const optionsContainer = $('optionsContainer');
+        const submitBtn = $('submitAnswerBtn');
+        const feedbackMsg = $('feedbackMsg');
+        const lbList = $('lbList');
+        const adminLbList = $('adminLbList');
+        const statPlayers = $('statPlayers');
+        const statAnswers = $('statAnswers');
+        const statQuestions = $('statQuestions');
+        const questionsList = $('questionsList');
+        const winnerOverlay = $('winnerOverlay');
+        const winnerName = $('winnerName');
+        const winnerScore = $('winnerScore');
+        const top10List = $('top10List');
+        const resetWinnerBtn = $('resetWinnerBtn');
+        const confettiContainer = $('confettiContainer');
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let currentPlayerId = null;
+        let currentQuestionId = null;
+        let isAdmin = false;
+        let selectedOption = null;
+        let answerLocked = false;
+        let sessionId = localStorage.getItem('yallaSessionId');
+        let timerInterval = null;
+        let isQuestionOpen = false;
+        let selectedQuestionId = null;
+        let questionsData = [];
+
+        // ============================================================
+        // 1. AUTHENTICATION
+        // ============================================================
+        async function initAuth() {
+            try {
+                const cred = await signInAnonymously(auth);
+                currentUser = cred.user;
+                console.log('✅ Auth OK', currentUser.uid);
+
+                if (sessionId) {
+                    const snap = await getDoc(doc(db, 'players', sessionId));
+                    if (snap.exists()) {
+                        currentPlayerId = sessionId;
+                        const data = snap.data();
+                        studentNameInput.value = data.name || '';
+                        if (data.isAdmin === true) isAdmin = true;
+                        showDashboard();
+                        startListening();
+                        return;
+                    } else {
+                        localStorage.removeItem('yallaSessionId');
+                        sessionId = null;
+                    }
+                }
+                loginSection.classList.remove('hidden');
+                studentDashboard.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+            } catch (e) {
+                console.error('Auth error', e);
+                alert('فشل الاتصال بالخادم. حاول مجدداً.');
+            }
+        }
+
+        // ============================================================
+        // 2. STUDENT LOGIN
+        // ============================================================
+        joinBtn.addEventListener('click', async () => {
+            const name = studentNameInput.value.trim();
+            if (!name) return alert('الرجاء إدخال اسمك الثنائي');
+            if (!currentUser) return alert('جارٍ الاتصال... حاول مجدداً');
+
+            try {
+                // Check if name already exists
+                const q = query(collection(db, 'players'), where('name', '==', name));
+                const snap = await getDocs(q);
+                let playerId = null;
+
+                if (!snap.empty) {
+                    const docSnap = snap.docs[0];
+                    playerId = docSnap.id;
+                    // If different session, warn
+                    if (sessionId && sessionId !== playerId) {
+                        if (!confirm('هذا الاسم مسجل مسبقاً. هل تريد المتابعة؟')) return;
+                    }
+                }
+
+                const playerRef = doc(db, 'players', playerId || currentUser.uid);
+                const playerData = {
+                    name: name,
+                    isAdmin: false,
+                    score: 0,
+                    joinedAt: serverTimestamp(),
+                    sessionId: currentUser.uid,
+                    answers: []
+                };
+                await setDoc(playerRef, playerData, { merge: true });
+                currentPlayerId = playerRef.id;
+                sessionId = currentPlayerId;
+                localStorage.setItem('yallaSessionId', sessionId);
+                showDashboard();
+                startListening();
+            } catch (e) {
+                console.error('Join error', e);
+                alert('حدث خطأ أثناء التسجيل. حاول مجدداً.');
+            }
+        });
+
+        // ============================================================
+        // 3. DASHBOARD
+        // ============================================================
+        function showDashboard() {
+            loginSection.classList.add('hidden');
+            studentDashboard.classList.remove('hidden');
+            if (isAdmin) {
+                adminPanel.classList.remove('hidden');
+                loadAdminStats();
+                loadAdminQuestions();
+                loadAdminLeaderboard();
+            }
+        }
+
+        // ============================================================
+        // 4. LIVE LISTENING
+        // ============================================================
+        function startListening() {
+            // Listen to live session
+            onSnapshot(doc(db, 'liveSession', 'current'), async (snap) => {
+                if (!snap.exists()) {
+                    qTitle.textContent = '⏳ لا يوجد سؤال مفتوح';
+                    optionsContainer.innerHTML = '';
+                    submitBtn.disabled = true;
+                    feedbackMsg.textContent = 'في انتظار فتح السؤال...';
+                    feedbackMsg.className = 'feedback-msg';
+                    timerDisplay.textContent = '⏳ 0';
+                    isQuestionOpen = false;
+                    return;
+                }
+
+                const data = snap.data();
+                const qId = data.questionId;
+                isQuestionOpen = data.isOpen || false;
+
+                if (!qId || !data.isOpen) {
+                    qTitle.textContent = '⏳ لا يوجد سؤال مفتوح';
+                    optionsContainer.innerHTML = '';
+                    submitBtn.disabled = true;
+                    feedbackMsg.textContent = 'في انتظار فتح السؤال...';
+                    feedbackMsg.className = 'feedback-msg';
+                    timerDisplay.textContent = '⏳ 0';
+                    return;
+                }
+
+                // Get question (WITHOUT correctIndex for students)
+                const qSnap = await getDoc(doc(db, 'questions', qId));
+                if (!qSnap.exists()) return;
+                const qData = qSnap.data();
+                currentQuestionId = qId;
+
+                // Render question (no correct answer)
+                renderQuestion(qData, data.isOpen);
+
+                // Timer based on server time
+                if (data.isOpen && data.openedAt) {
+                    const opened = data.openedAt.toDate();
+                    const duration = qData.duration || 60;
+                    const elapsed = (Date.now() - opened.getTime()) / 1000;
+                    const remaining = Math.max(0, Math.floor(duration - elapsed));
+                    startTimer(remaining);
+
+                    // Auto-close if time is up
+                    if (remaining <= 0 && data.isOpen) {
+                        await updateDoc(doc(db, 'liveSession', 'current'), {
+                            isOpen: false
+                        });
+                    }
+                }
+            });
+
+            // Listen to leaderboard
+            const q = query(collection(db, 'players'), orderBy('score', 'desc'), limit(15));
+            onSnapshot(q, (snap) => {
+                let html = '';
+                let rank = 1;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const cls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+                    html += `<div class="lb-item ${cls}">
+                                <span class="lb-rank">#${rank}</span>
+                                <span class="lb-name">${data.name || 'غير معروف'}</span>
+                                <span class="lb-score">${data.score || 0}</span>
+                             </div>`;
+                    rank++;
+                });
+                lbList.innerHTML = html || '<div class="lb-item">لا يوجد مشاركون</div>';
+            });
+        }
+
+        // ============================================================
+        // 5. RENDER QUESTION (NO correctIndex)
+        // ============================================================
+        function renderQuestion(qData, isOpen) {
+            qTitle.textContent = qData.title || 'السؤال';
+            optionsContainer.innerHTML = '';
+
+            const choices = qData.choices || ['أ', 'ب', 'ج', 'د'];
+            choices.forEach((choice, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = choice;
+                btn.dataset.index = idx;
+                btn.disabled = !isOpen || answerLocked;
+                btn.addEventListener('click', () => {
+                    if (!isOpen || answerLocked) return;
+                    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedOption = idx;
+                    submitBtn.disabled = false;
+                });
+                optionsContainer.appendChild(btn);
+            });
+
+            submitBtn.disabled = true;
+            if (!isOpen) {
+                feedbackMsg.textContent = '⏳ السؤال مغلق';
+                feedbackMsg.className = 'feedback-msg closed';
+            } else if (answerLocked) {
+                feedbackMsg.textContent = '✅ تم استلام إجابتك';
+                feedbackMsg.className = 'feedback-msg';
+            } else {
+                feedbackMsg.textContent = 'اختر إجابة ثم أرسل';
+                feedbackMsg.className = 'feedback-msg';
+            }
+        }
+
+        // ============================================================
+        // 6. TIMER (Based on Server)
+        // ============================================================
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            let remaining = seconds;
+            timerDisplay.textContent = `⏳ ${remaining}`;
+
+            timerInterval = setInterval(() => {
+                remaining -= 1;
+                timerDisplay.textContent = `⏳ ${remaining}`;
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = '⏳ 0';
+                    // Question auto-closes via Firestore listener
+                }
+            }, 1000);
+        }
+
+        // ============================================================
+        // 7. SUBMIT ANSWER (Secure - Server side scoring)
+        // ============================================================
+        submitBtn.addEventListener('click', async () => {
+            if (answerLocked) return;
+            if (selectedOption === null) return alert('اختر إجابة أولاً');
+            if (!currentQuestionId) return alert('لا يوجد سؤال مفتوح');
+            if (!currentPlayerId) return alert('لم تسجل دخولك');
+            if (!isQuestionOpen) return alert('السؤال مغلق');
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const playerRef = doc(db, 'players', currentPlayerId);
+                    const playerSnap = await transaction.get(playerRef);
+                    if (!playerSnap.exists()) throw new Error('Player not found');
+
+                    const playerData = playerSnap.data();
+                    if (playerData.answers && playerData.answers.includes(currentQuestionId)) {
+                        throw new Error('لقد أجبت على هذا السؤال مسبقاً');
+                    }
+
+                    // Record answer - points calculated by Cloud Function
+                    const answerRef = doc(collection(db, 'answers'));
+                    transaction.set(answerRef, {
+                        playerId: currentPlayerId,
+                        playerName: playerData.name,
+                        questionId: currentQuestionId,
+                        selected: selectedOption,
+                        timestamp: serverTimestamp(),
+                        status: 'pending'
+                    });
+
+                    // Mark as answered
+                    transaction.update(playerRef, {
+                        answers: arrayUnion(currentQuestionId)
+                    });
+                });
+
+                answerLocked = true;
+                submitBtn.disabled = true;
+                feedbackMsg.textContent = '✅ تم استلام إجابتك';
+                feedbackMsg.className = 'feedback-msg';
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+            } catch (e) {
+                console.error('Submit error', e);
+                alert(e.message || 'حدث خطأ أثناء الإرسال');
+            }
+        });
+
+        // ============================================================
+        // 8. ADMIN: LOAD QUESTIONS
+        // ============================================================
+        function loadAdminQuestions() {
+            const q = query(collection(db, 'questions'), orderBy('createdAt', 'desc'));
+            onSnapshot(q, (snap) => {
+                questionsData = [];
+                let html = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const id = doc.id;
+                    questionsData.push({ id, ...data });
+                    const isSelected = selectedQuestionId === id;
+                    html += `
+                                <div class="q-item ${isSelected ? 'selected' : ''}" data-id="${id}">
+                                    <span class="q-title">${data.title || 'بدون عنوان'}</span>
+                                    <span class="q-status">${data.answeredCount || 0} أجوبة</span>
+                                    <div class="q-actions">
+                                        <button onclick="window.selectQuestion('${id}')">اختيار</button>
+                                        <button onclick="window.editQuestion('${id}')">✏️</button>
+                                    </div>
+                                </div>
+                            `;
+                });
+                questionsList.innerHTML = html || '<div style="color:#6c8bc0;padding:16px;text-align:center;">لا توجد أسئلة. اضغط ➕ إضافة</div>';
+            });
+        }
+
+        // Global functions for admin actions
+        window.selectQuestion = (id) => {
+            selectedQuestionId = id;
+            loadAdminQuestions();
+        };
+
+        window.editQuestion = async (id) => {
+            if (!isAdmin) return;
+            const snap = await getDoc(doc(db, 'questions', id));
+            if (!snap.exists()) return;
+            const data = snap.data();
+
+            const title = prompt('عنوان السؤال:', data.title);
+            if (title === null) return;
+
+            const choices = [];
+            for (let i = 0; i < 4; i++) {
+                const val = prompt(`الاختيار ${i+1}:`, data.choices[i] || '');
+                if (val === null) return;
+                choices.push(val || `اختيار ${i+1}`);
+            }
+            const correct = parseInt(prompt('رقم الإجابة الصحيحة (0-3):', data.correctIndex));
+            if (isNaN(correct) || correct < 0 || correct > 3) return alert('رقم غير صحيح');
+            const duration = parseInt(prompt('مدة السؤال بالثواني:', data.duration || 60)) || 60;
+
+            await updateDoc(doc(db, 'questions', id), {
+                title: title || 'سؤال',
+                choices,
+                correctIndex: correct,
+                duration: duration
+            });
+            alert('✅ تم التعديل');
+            loadAdminQuestions();
+        };
+
+        // ============================================================
+        // 9. ADMIN: ACTIONS
+        // ============================================================
+
+        // Add Question
+        $('adminAddQ').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+
+            const title = prompt('عنوان السؤال:');
+            if (title === null) return;
+
+            const choices = [];
+            for (let i = 0; i < 4; i++) {
+                const val = prompt(`الاختيار ${i+1}:`);
+                if (val === null) return;
+                choices.push(val || `اختيار ${i+1}`);
+            }
+            const correct = parseInt(prompt('رقم الإجابة الصحيحة (0-3):'));
+            if (isNaN(correct) || correct < 0 || correct > 3) return alert('رقم غير صحيح');
+            const duration = parseInt(prompt('مدة السؤال بالثواني (20-120):', '60')) || 60;
+
+            try {
+                await addDoc(collection(db, 'questions'), {
+                    title: title || 'سؤال',
+                    choices,
+                    correctIndex: correct,
+                    duration: Math.min(Math.max(duration, 10), 120),
+                    answeredCount: 0,
+                    createdAt: serverTimestamp()
+                });
+                alert('✅ تم إضافة السؤال');
+                loadAdminQuestions();
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // Open Question
+        $('adminOpenQ').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+            if (!selectedQuestionId) return alert('اختر سؤالاً من القائمة أولاً');
+
+            try {
+                const qSnap = await getDoc(doc(db, 'questions', selectedQuestionId));
+                if (!qSnap.exists()) return alert('السؤال غير موجود');
+                const qData = qSnap.data();
+
+                await setDoc(doc(db, 'liveSession', 'current'), {
+                    questionId: selectedQuestionId,
+                    isOpen: true,
+                    openedAt: serverTimestamp(),
+                    showWinner: false
+                });
+                alert('✅ السؤال مفتوح للجميع');
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // Close Question
+        $('adminCloseQ').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+            try {
+                await updateDoc(doc(db, 'liveSession', 'current'), {
+                    isOpen: false
+                });
+                alert('🔒 السؤال مغلق');
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // Next Question (clear live)
+        $('adminNextQ').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+            try {
+                await setDoc(doc(db, 'liveSession', 'current'), {
+                    questionId: null,
+                    isOpen: false,
+                    showWinner: false
+                });
+                selectedQuestionId = null;
+                alert('⏩ جاهز للسؤال التالي');
+                loadAdminQuestions();
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // Delete Question
+        $('adminDeleteQ').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+            if (!selectedQuestionId) return alert('اختر سؤالاً من القائمة أولاً');
+            if (!confirm('تأكيد حذف السؤال؟')) return;
+
+            try {
+                await deleteDoc(doc(db, 'questions', selectedQuestionId));
+                selectedQuestionId = null;
+                alert('🗑️ تم الحذف');
+                loadAdminQuestions();
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // Declare Winner
+        $('adminDeclareWinner').addEventListener('click', async () => {
+            if (!isAdmin) return alert('غير مصرح');
+
+            try {
+                await updateDoc(doc(db, 'liveSession', 'current'), {
+                    showWinner: true
+                });
+                alert('🏆 تم إعلان النتيجة');
+            } catch (e) {
+                alert('خطأ: ' + e.message);
+            }
+        });
+
+        // ============================================================
+        // 10. ADMIN: STATS
+        // ============================================================
+        function loadAdminStats() {
+            onSnapshot(collection(db, 'players'), (snap) => {
+                statPlayers.textContent = snap.size;
+            });
+            onSnapshot(collection(db, 'answers'), (snap) => {
+                statAnswers.textContent = snap.size;
+            });
+            onSnapshot(collection(db, 'questions'), (snap) => {
+                statQuestions.textContent = snap.size;
+            });
+        }
+
+        // ============================================================
+        // 11. ADMIN: LEADERBOARD
+        // ============================================================
+        function loadAdminLeaderboard() {
+            const q = query(collection(db, 'players'), orderBy('score', 'desc'), limit(30));
+            onSnapshot(q, (snap) => {
+                let html = '';
+                let rank = 1;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    html += `<div class="lb-item">
+                                <span class="lb-rank">#${rank}</span>
+                                <span class="lb-name">${data.name || 'غير معروف'}</span>
+                                <span class="lb-score">${data.score || 0}</span>
+                             </div>`;
+                    rank++;
+                });
+                adminLbList.innerHTML = html || '<div class="lb-item">لا يوجد مشاركون</div>';
+            });
+        }
+
+        // ============================================================
+        // 12. WINNER SCREEN (Cinematic)
+        // ============================================================
+        // Listen for winner declaration
+        onSnapshot(doc(db, 'liveSession', 'current'), async (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
+            if (data.showWinner) {
+                const q = query(collection(db, 'players'), orderBy('score', 'desc'), limit(10));
+                const snap = await getDocs(q);
+                const winners = [];
+                snap.forEach(d => winners.push({ id: d.id, ...d.data() }));
+                showWinnerScreen(winners);
+            }
+        });
+
+        function showWinnerScreen(winners) {
+            winnerOverlay.classList.remove('hidden');
+
+            const first = winners[0] || { name: 'غير معروف', score: 0 };
+            winnerName.textContent = first.name || 'غير معروف';
+            winnerScore.textContent = `⭐ نقاط: ${first.score || 0}`;
+
+            let topHtml = '';
+            winners.slice(1, 10).forEach((p, i) => {
+                topHtml += `<div class="lb-item">
+                                <span class="lb-rank">#${i+2}</span>
+                                <span class="lb-name">${p.name || 'غير معروف'}</span>
+                                <span class="lb-score">${p.score || 0}</span>
+                             </div>`;
+            });
+            top10List.innerHTML = topHtml || '<div class="lb-item">لا يوجد متسابقون آخرون</div>';
+
+            // Launch confetti & fireworks
+            launchCelebration();
+        }
+
+        function launchCelebration() {
+            confettiContainer.innerHTML = '';
+
+            // Confetti pieces
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bff', '#ffb347', '#a78bfa', '#f472b6'];
+            for (let i = 0; i < 150; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                const size = 6 + Math.random() * 10;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const duration = 2 + Math.random() * 3;
+                const delay = Math.random() * 2;
+                const left = Math.random() * 100;
+                const rotate = Math.random() * 360;
+                const shape = Math.random() > 0.5 ? '50%' : '2px';
+
+                piece.style.cssText = `
+                            left: ${left}%;
+                            width: ${size}px;
+                            height: ${size}px;
+                            background: ${color};
+                            border-radius: ${shape};
+                            animation-duration: ${duration}s;
+                            animation-delay: ${delay}s;
+                            transform: rotate(${rotate}deg);
+                        `;
+                confettiContainer.appendChild(piece);
+            }
+
+            // Fireworks bursts (repeating)
+            let fireworkCount = 0;
+            const maxFireworks = 15;
+            const fireworkInterval = setInterval(() => {
+                if (fireworkCount >= maxFireworks) {
+                    clearInterval(fireworkInterval);
+                    return;
+                }
+                createFirework();
+                fireworkCount++;
+            }, 400);
+
+            // Clean up after 8 seconds
+            setTimeout(() => {
+                clearInterval(fireworkInterval);
+            }, 8000);
+        }
+
+        function createFirework() {
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bff', '#ffb347', '#a78bfa', '#f472b6', '#22d3ee'];
+            const x = 10 + Math.random() * 80;
+            const y = 10 + Math.random() * 70;
+
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'firework';
+                const size = 4 + Math.random() * 6;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const angle = Math.random() * 360;
+                const distance = 50 + Math.random() * 120;
+                const dx = Math.cos(angle * Math.PI / 180) * distance;
+                const dy = Math.sin(angle * Math.PI / 180) * distance;
+
+                spark.style.cssText = `
+                            left: ${x}%;
+                            top: ${y}%;
+                            width: ${size}px;
+                            height: ${size}px;
+                            background: ${color};
+                            border-radius: 50%;
+                            box-shadow: 0 0 ${size * 2}px ${color};
+                            animation: fireworkBurst 0.8s ease-out forwards;
+                            --dx: ${dx}px;
+                            --dy: ${dy}px;
+                            transform: translate(0, 0) scale(0);
+                        `;
+                // Custom animation for each spark
+                const keyframes = `
+                            @keyframes firework_${Date.now()}_${i} {
+                                0% { transform: translate(0, 0) scale(0); opacity: 1; }
+                                100% { transform: translate(${dx}px, ${dy}px) scale(1.5); opacity: 0; }
+                            }
+                        `;
+                const style = document.createElement('style');
+                style.textContent = keyframes;
+                document.head.appendChild(style);
+                spark.style.animation = `firework_${Date.now()}_${i} 0.8s ease-out forwards`;
+
+                confettiContainer.appendChild(spark);
+
+                // Remove spark after animation
+                setTimeout(() => {
+                    if (spark.parentNode) spark.remove();
+                }, 900);
+            }
+        }
+
+        // ============================================================
+        // 13. RESET WINNER
+        // ============================================================
+        resetWinnerBtn.addEventListener('click', async () => {
+            winnerOverlay.classList.add('hidden');
+            confettiContainer.innerHTML = '';
+            // Reset winner flag
+            try {
+                await updateDoc(doc(db, 'liveSession', 'current'), {
+                    showWinner: false
+                });
+            } catch (e) {
+                console.log('Reset winner error:', e);
+            }
+        });
+
+        // ============================================================
+        // 14. ADMIN TOGGLE (SECURE - Only via Firestore)
+        // ============================================================
+        // Double click on logo to check admin status (not toggle)
+        // Admin is determined by Firestore only
+        document.querySelector('.brand-logo').addEventListener('dblclick', async () => {
+            if (!currentPlayerId) return;
+            try {
+                const snap = await getDoc(doc(db, 'players', currentPlayerId));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.isAdmin === true) {
+                        isAdmin = true;
+                        adminPanel.classList.remove('hidden');
+                        loadAdminStats();
+                        loadAdminQuestions();
+                        loadAdminLeaderboard();
+                        alert('🔑 وضع الأدمن مفعل');
+                    } else {
+                        alert('❌ ليس لديك صلاحيات الأدمن');
+                    }
+                }
+            } catch (e) {
+                alert('خطأ في التحقق');
+            }
+        });
+
+        // ============================================================
+        // 15. INIT
+        // ============================================================
+        initAuth();
+
+        console.log('🚀 Yalla Chemistry Live Contest v2 - Secure Edition');
+        console.log('📌 Features: Server-side scoring, hidden answers, admin panel');
+
+        // ============================================================
+        // FIREBASE SECURITY RULES (ضعها في Firebase Console)
+        // ============================================================
+        /*
+        rules_version = '2';
+        service cloud.firestore {
+          match /databases/{database}/documents {
+
+            // PLAYERS - منع تعديل النقاط من العميل
+            match /players/{playerId} {
+              allow read: if request.auth != null;
+              allow write: if request.auth != null && request.auth.uid == playerId;
+              allow update: if request.auth != null && 
+                request.auth.uid == playerId &&
+                request.resource.data.score == resource.data.score && // منع تغيير النقاط
+                request.resource.data.answers == resource.data.answers; // منع تغيير الإجابات
+            }
+
+            // QUESTIONS - فقط الأدمن يقرأ ويكتب
+            match /questions/{questionId} {
+              allow read: if request.auth != null && 
+                get(/databases/$(database)/documents/players/$(request.auth.uid)).data.isAdmin == true;
+              allow write: if request.auth != null && 
+                get(/databases/$(database)/documents/players/$(request.auth.uid)).data.isAdmin == true;
+            }
+
+            // LIVE SESSION - الكل يقرأ، فقط الأدمن يكتب
+            match /liveSession/{docId} {
+              allow read: if request.auth != null;
+              allow write: if request.auth != null && 
+                get(/databases/$(database)/documents/players/$(request.auth.uid)).data.isAdmin == true;
+            }
+
+            // ANSWERS - يمنع الكتابة المباشرة (تتم عبر Cloud Function)
+            match /answers/{answerId} {
+              allow read: if request.auth != null && 
+                get(/databases/$(database)/documents/players/$(request.auth.uid)).data.isAdmin == true;
+              allow write: if false;
+            }
+
+            // LEADERBOARD - قراءة فقط
+            match /leaderboard/{docId} {
+              allow read: if request.auth != null;
+              allow write: if false;
+            }
+          }
+        }
+        */
+
+        // ============================================================
+        // CLOUD FUNCTION (ضعها في Firebase Cloud Functions)
+        // ============================================================
+        /*
+        exports.processAnswer = functions.firestore
+            .document('answers/{answerId}')
+            .onCreate(async (snap, context) => {
+                const data = snap.data();
+                const questionId = data.questionId;
+                const playerId = data.playerId;
+                const selected = data.selected;
+
+                // Get question
+                const qSnap = await admin.firestore().doc(`questions/${questionId}`).get();
+                if (!qSnap.exists) return;
+                const question = qSnap.data();
+
+                // Check if correct
+                const isCorrect = (selected === question.correctIndex);
+
+                // Get order of correct answers
+                const answersQuery = await admin.firestore()
+                    .collection('answers')
+                    .where('questionId', '==', questionId)
+                    .where('isCorrect', '==', true)
+                    .orderBy('timestamp')
+                    .get();
+
+                const correctCount = answersQuery.size;
+                let points = 0;
+
+                if (isCorrect) {
+                    if (correctCount === 0) points = 10;
+                    else if (correctCount === 1) points = 9;
+                    else if (correctCount === 2) points = 8;
+                    else if (correctCount === 3 || correctCount === 4) points = 7;
+                    else if (correctCount >= 5 && correctCount <= 9) points = 6;
+                    else points = 5;
+                }
+
+                // Update answer
+                await snap.ref.update({
+                    isCorrect: isCorrect,
+                    points: points,
+                    order: correctCount + 1,
+                    processed: true
+                });
+
+                // Update player score
+                if (isCorrect && points > 0) {
+                    await admin.firestore()
+                        .doc(`players/${playerId}`)
+                        .update({
+                            score: admin.firestore.FieldValue.increment(points)
+                        });
+                }
+            });
+        */
+    </script>
+
+</body>
+</html>
